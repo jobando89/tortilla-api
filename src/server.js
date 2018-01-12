@@ -26,7 +26,7 @@ const signals = [
 ];
 
 
-const create = async (definition = {}, events = {}, wrapper = {}) => {
+const create = async (definition, events, wrapper) => {
 
     const context = {
         env: process.env, //Register run environment
@@ -39,12 +39,8 @@ const create = async (definition = {}, events = {}, wrapper = {}) => {
                 ...definition
             },
         },
-        events: {
-            ...events
-        },
-        wrapper: {
-            ...wrapper
-        }
+        events,
+        wrapper
     };
 
 
@@ -60,7 +56,7 @@ const create = async (definition = {}, events = {}, wrapper = {}) => {
 
     try {
         registerErrorHandler(error);
-        signals.forEach(sig => process.on(sig, onSignal(context,timeout))); //Register termination signals
+        signals.forEach(sig => process.on(sig, onSignal(context, timeout))); //Register termination signals
         serverInit(context);
     } catch (err) {
         logger.error({err}, 'Service failed to start');
@@ -109,7 +105,7 @@ const createServer = (context) => {
 };
 
 const mapWrapperProperties = context => (req, res, next) => {
-    req.wrapperProperties = get(context, 'wrapper', {});
+    req.wrapperProperties = get(context, 'wrapper', noop);
     next();
 };
 
@@ -167,7 +163,7 @@ const registerErrorHandler = (callback = noop) => {
 };
 
 
-const onSignal =  (context,timeout) =>  ()=>{
+const onSignal = (context, timeout) => () => {
     logger.info('Starting API Termination');
     Promise.race([
         Promise.delay(timeout).then(() => logger.warn('API termination is waiting too long to finish')),
@@ -180,7 +176,7 @@ const onSignal =  (context,timeout) =>  ()=>{
             }
         })()
     ]).then(
-        ()=>  process.exit(exitCode.success)
+        () => process.exit(exitCode.success)
     );
 
 };

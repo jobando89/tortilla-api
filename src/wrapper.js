@@ -1,4 +1,4 @@
-const {get, keys} = require('lodash');
+const {get, keys, noop} = require('lodash');
 const guid = require('guid');
 const config = require('config');
 const Logger = require('logplease');
@@ -14,9 +14,10 @@ class Wrapper {
     static wrap(operation) {
         return async (req, res) => {
             const wrapper = new Wrapper(req, res);
-            const wrapperProperties = get(req, 'wrapperProperties', {});
+            const wrapperFunction = get(req, 'wrapperProperties', noop);
+            const wrapperProperties = wrapperFunction(req, res);
             keys(wrapperProperties).forEach(key => {
-                wrapper[key] = wrapperProperties[key];
+                wrapper[key] = () => wrapperProperties[key](req, res);
             });
 
             try {
