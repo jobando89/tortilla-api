@@ -70,9 +70,9 @@ const serverInit = async (context) => {
     await has(context, 'events.onServerStart') ? context.events.onServerStart(context) : Promise.resolve();//Execute Event If Any
 
     await loadSwaggerYaml(context);//Load swagger definition
-    createServer(context); // Start restify server
-    await swaggerize(context);
-    await listen(context);
+    createServer(context); // Create restify server
+    await swaggerize(context); //Load option for swagger configuration
+    await listen(context); //Start Server
 
     await has(context, 'events.afterStart') ? context.events.onServerStart(context) : Promise.resolve();//Execute Event If Any
 
@@ -103,35 +103,32 @@ const createServer = (context) => {
 };
 
 const mapWrapperProperties = context => (req, res, next) => {
-    req.wrapperProperties = get(context, 'wrapper', noop);
+    req.wrapperProperties = get(context, 'wrapper.props', noop);
+    res.errorHandler = get(context, 'wrapper.errorHandler');
     next();
 };
 
+//Create swagger configuration
 const swaggerize = async (context) => {
     const appRoot = context.internal.definition.appRoot;
     logger.debug('Loading swagger definition');
     const create = Promise.promisify(swaggerRestify.create);
 
     const fittingsPath = path.resolve(`${appRoot}/fittings`);
-    const swaggerConfig = require(`${appRoot}/config/defaultSwaggerConfig.json`);
+    const swaggerConfig = require(`${appRoot}/config/defaultSwaggerConfig.json`); //Load default config
     castArray(get(swaggerConfig, 'fittingsDirs', [])).push(fittingsPath);
 
-    const cors = [
-        get(context, 'config.cors'),
-        get(context, 'env.NODE_ENV', '').toLowerCase() === 'local_dev' ? true : null,
-        false
-    ].find(x => !isNil(x));
-    set(swaggerConfig, 'bagpipes._preflight.cors', cors);
+    const cors = get(context, 'env.NODE_ENV', '').toLowerCase() === 'local_dev' ? true : false;//get value for cors
 
-    const options = merge(
-        {},
-        swaggerConfig,
-        get(context, 'config.swagger', {}),
-        {
-            swagger: context.swagger.definition,
-            appRoot: context.internal.definition.appRoot
-        }
-    );
+    set(swaggerConfig, 'bagpipes._preflight.cors', cors); //Set value for cors
+
+    const options = {
+        ...swaggerConfig,
+        ...get(context, 'config.swagger', {}),
+        swagger: context.swagger.definition,
+        appRoot: context.internal.definition.appRoot
+    };
+
     const swagger = await create(options);
     logger.debug('Swagger definition loaded, registering routes with restify server');
     swagger.register(context.restify.server);

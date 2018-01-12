@@ -28,8 +28,9 @@ class Wrapper {
                     const message = get(err, 'message', 'Unknown error occurred');
                     let statusCode = get(err, 'statusCode', 500);
                     logger.error(message, err);
-
-                    return wrapper.reply(statusCode, message);
+                    const defaultHandler = wrapper.reply;
+                    const errorHandler = get(res, 'errorHandler', defaultHandler);
+                    return errorHandler(statusCode, message);
                 }
                 catch (sendError) {
                     logger.error('Failed to send API response', sendError);
