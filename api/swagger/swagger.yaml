@@ -1,0 +1,25 @@
+swagger: "2.0"
+info:
+  version: "0.0.1"
+  title: Tortilla API
+basePath: /
+
+paths:
+
+  /:
+    x-swagger-router-controller: about
+    get:
+      tags:
+        - Hide
+      summary: / Site
+      operationId: get
+      description: Returns service name and version
+      responses:
+        "200":
+          description: Success
+          schema:
+            properties:
+              name:
+                type: string
+              version:
+                type: string

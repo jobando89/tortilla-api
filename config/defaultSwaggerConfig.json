@@ -1,0 +1,38 @@
+{
+  "fittingsDirs": [
+    "api/fittings"
+  ],
+  "defaultPipe": null,
+  "swaggerControllerPipe": "swagger_controllers",
+  "bagpipes": {
+    "_router": {
+      "name": "swagger_router",
+      "mockMode": false,
+      "mockControllersDirs": [
+        "api/mocks"
+      ],
+      "controllersDirs": [
+        "api/controllers"
+      ]
+    },
+    "_swagger_validate": {
+      "name": "swagger_validator",
+      "validateResponse": false
+    },
+    "_preflight": {
+      "name": "preflight",
+      "cors": false
+    },
+    "swagger_controllers": [
+      {
+        "onError": "json_error_handler"
+      },
+      "_preflight",
+      "swagger_security",
+      "swagger_params_parser",
+      "_swagger_validate",
+      "express_compatibility",
+      "_router"
+    ]
+  }
+}
