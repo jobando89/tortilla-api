@@ -17,7 +17,7 @@ class Wrapper {
             const wrapperFunction = get(req, 'wrapperProperties', noop);
             const wrapperProperties = wrapperFunction(req, res);
             keys(wrapperProperties).forEach(key => {
-                wrapper[key] = () => wrapperProperties[key](req, res);
+                wrapper[key] = () => wrapperProperties[key](wrapper.req, wrapper.res);
             });
 
             try {
