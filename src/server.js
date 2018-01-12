@@ -33,13 +33,13 @@ const create = async (definition, events, wrapper) => {
         config,
         internal: {
             definition: {
-                appRoot: __dirname,
-                port: get(config, 'port', 8080),
-                error: noop,
-                ...definition
+                appRoot: __dirname, //This directory
+                port: get(config, 'port', 8080), //Default port
+                error: noop, //Return undefined
+                ...definition //Overwrite the properties
             },
         },
-        events,
+        events,//{onServerStart,afterStart}
         wrapper
     };
 
@@ -55,9 +55,9 @@ const create = async (definition, events, wrapper) => {
     const error = get(context, 'internal.definition.error', noop);
 
     try {
-        registerErrorHandler(error);
-        signals.forEach(sig => process.on(sig, onSignal(context, timeout))); //Register termination signals
-        serverInit(context);
+        registerErrorHandler(error); ////Register and event handler when there is an unhandled exception on the application
+        signals.forEach(sig => process.on(sig, onSignal(context, timeout))); //Register termination signals and how to handle them
+        serverInit(context); //Initialise and start server
     } catch (err) {
         logger.error({err}, 'Service failed to start');
         process.exit(exitCode.startFailed);
@@ -67,14 +67,14 @@ const create = async (definition, events, wrapper) => {
 const serverInit = async (context) => {
     logger.info(`Starting API At Port ${context.internal.definition.port}`);
 
-    await has(context, 'events.onServerStart') ? context.events.onServerStart(context) : Promise.resolve();
+    await has(context, 'events.onServerStart') ? context.events.onServerStart(context) : Promise.resolve();//Execute Event If Any
 
-    await loadSwaggerYaml(context);
-    createServer(context);
+    await loadSwaggerYaml(context);//Load swagger definition
+    createServer(context); // Start restify server
     await swaggerize(context);
     await listen(context);
 
-    await has(context, 'events.afterStart') ? context.events.onServerStart(context) : Promise.resolve();
+    await has(context, 'events.afterStart') ? context.events.onServerStart(context) : Promise.resolve();//Execute Event If Any
 
     return get(context, ['restify', 'server']);
 };
@@ -82,26 +82,24 @@ const serverInit = async (context) => {
 const loadSwaggerYaml = async (context) => {
     const appRoot = context.internal.definition.appRoot;
     const swaggerPath = path.join(appRoot, 'api/swagger/swagger.yaml');
-    const swaggerDefinition = await swaggerParser.dereference(swaggerPath);
-    set(context, ['swagger', 'definition'], swaggerDefinition);
+    const swaggerDefinition = await swaggerParser.dereference(swaggerPath); //Load swagger file
+    set(context, 'swagger.definition', swaggerDefinition); //Load definition to current context
     global.swaggerDefinition = swaggerDefinition;
 };
 
 const createServer = (context) => {
     logger.debug('Creating restify server');
-    const server = restify.createServer(Object.assign(
-        pick(context.internal.definition, 'name', 'formatters')
-    ));
-    server.on('uncaughtException', (req, res, route, err) => {
+    const server = restify.createServer();
+    server.on('uncaughtException', (req, res, route, err) => { //Register application exception handler
         logger.error({route, err}, 'An unhandled exception has occurred');
         res.send(500, 'An internal error has occurred.');
     });
 
     get(context, 'events.middleware', []).map(middleware => server.use(middleware)); //Register server middleware
-    server.use(mapWrapperProperties(context));
+    server.use(mapWrapperProperties(context)); //Register middleware for wrapper use
     server.use(bodyParser.json(context));
     server.use(busboyBodyParcer());
-    set(context, ['restify', 'server'], server);
+    set(context, 'restify.server', server); ////Load server to current context
 };
 
 const mapWrapperProperties = context => (req, res, next) => {
@@ -149,15 +147,24 @@ const listen = async (context) => {
     logger.info(`API started, now listening on ${port}`);
 };
 
+//Register and event handler when there is an unhandled exception on the application
 const registerErrorHandler = (callback = noop) => {
-
     function unhandledError(err) {
-        logger.error({err: err}, 'An unhandled error has occurred');
-        return Promise.try(() => callback(err))
-            .catch(err => logger.error({err}, 'Exception handler failed'))
-            .finally(() => process.exit(exitCode.uncaughtError));
+        logger.error({err: err}, 'An unhandled error has occurred'); //Log Error
+        return Promise.resolve(
+            (async () => {
+                try {
+                    await callback(err); //Attempt to use call back to handle error
+                } catch (err) {//If there is an exception
+                    err => logger.error({err}, 'Exception handler failed');
+                } finally {
+                    process.exit(exitCode.uncaughtError); //Terminate a
+                }
+            })());
     }
 
+    //Map the event types
+    //https://nodejs.org/api/process.html#process_event_unhandledrejection
     process.on('uncaughtException', unhandledError);
     process.on('unhandledRejection', unhandledError);
 };

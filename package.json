@@ -1,6 +1,7 @@
 {
   "name": "tortilla-api",
   "version": "0.0.6",
+  "version": "0.0.8",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -32,7 +33,6 @@
   },
   "dependencies": {
     "bagpipe": "^0.3.5",
-    "bluebird": "^3.5.1",
     "body-parser": "^1.18.2",
     "busboy-body-parser": "^0.3.1",
     "config": "^1.29.0",
