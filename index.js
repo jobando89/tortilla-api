@@ -1,5 +1,7 @@
 const server = require('./src/server');
+const wrapper = require('./src/wrapper');
 
 module.exports = {
-    create: server.create
+    create: server.create,
+    wrapper
 };
