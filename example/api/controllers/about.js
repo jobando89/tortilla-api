@@ -1,4 +1,4 @@
-const Wrapper = require('../../src/wrapper');
+const Wrapper = require('../../../src/wrapper');
 
 
 module.exports={

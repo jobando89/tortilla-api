@@ -52,10 +52,10 @@ const create = async (definition, events, wrapper) => {
 
     const timeout = get(context, 'internal.definition.terminateTimeout', 5000);
 
-    const error = get(context, 'internal.definition.error', noop);
+    const error = get(context, 'internal.events.error', noop);
 
     try {
-        registerErrorHandler(error); ////Register and event handler when there is an unhandled exception on the application
+        registerErrorHandler(error); //Register and event handler when there is an unhandled exception on the application
         signals.forEach(sig => process.on(sig, onSignal(context, timeout))); //Register termination signals and how to handle them
         serverInit(context); //Initialise and start server
     } catch (err) {
@@ -114,8 +114,8 @@ const swaggerize = async (context) => {
     logger.debug('Loading swagger definition');
     const create = Promise.promisify(swaggerRestify.create);
 
-    const fittingsPath = path.resolve(`${appRoot}/fittings`);
-    const swaggerConfig = require(`${appRoot}/config/defaultSwaggerConfig.json`); //Load default config
+    const fittingsPath = path.resolve(`${__dirname}/fittings`);
+    const swaggerConfig = require(`${__dirname}/config/defaultSwaggerConfig.json`); //Load default config
     castArray(get(swaggerConfig, 'fittingsDirs', [])).push(fittingsPath);
 
     const cors = get(context, 'env.NODE_ENV', '').toLowerCase() === 'local_dev' ? true : false;//get value for cors

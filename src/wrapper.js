@@ -30,7 +30,7 @@ class Wrapper {
                     logger.error(message, err);
                     const defaultHandler = wrapper.reply;
                     const errorHandler = get(res, 'errorHandler', defaultHandler);
-                    return errorHandler(statusCode, message);
+                    return errorHandler(statusCode, message,wrapper.reply);
                 }
                 catch (sendError) {
                     logger.error('Failed to send API response', sendError);
