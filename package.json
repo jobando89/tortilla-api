@@ -44,5 +44,14 @@
     "stoppable": "^1.0.4",
     "swagger-parser": "^4.0.1",
     "swagger-restify-mw": "^0.7.0"
-  }
+  },
+  "keywords": [
+    "api",
+    "http",
+    "javascript",
+    "node",
+    "rest",
+    "restify",
+    "swagger"
+  ]
 }
