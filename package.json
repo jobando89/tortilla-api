@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node example/start.js",
     "lint": "eslint src index.js example || true",
-    "cover": "NODE_ENV=test istanbul cover _mocha"
+    "cover": "NODE_ENV=test istanbul cover _mocha",
+    "test": "NODE_ENV=test mocha --reporter dot"
   },
   "repository": {
     "type": "git",
