@@ -1,4 +1,4 @@
-const {merge, pick, noop, get, set, isNil, castArray, has} = require('lodash');
+const {noop, get, set, isNil, castArray, has} = require('lodash');
 const Promise = require('bluebird');
 const swaggerRestify = require('swagger-restify-mw');
 const restify = require('restify');
@@ -44,20 +44,18 @@ const create = async (definition, events, wrapper) => {
     };
 
 
-    if (isNil(get(context, 'internal.definition'))) throw new Error('The application definition cannot be undefined');
-
     if (isNil(get(context, 'internal.definition.appRoot'))) throw new Error('The application appRoot cannot be undefined');
 
     if (isNil(get(context, 'internal.definition.port'))) throw new Error('The application port cannot be undefined');
 
     const timeout = get(context, 'internal.definition.terminateTimeout', 5000);
 
-    const error = get(context, 'internal.events.error', noop);
+    const error = get(context, 'events.error', noop);
 
     try {
         registerErrorHandler(error); //Register and event handler when there is an unhandled exception on the application
         signals.forEach(sig => process.on(sig, onSignal(context, timeout))); //Register termination signals and how to handle them
-        serverInit(context); //Initialise and start server
+        await serverInit(context); //Initialise and start server
     } catch (err) {
         logger.error({err}, 'Service failed to start');
         process.exit(exitCode.startFailed);
@@ -67,14 +65,14 @@ const create = async (definition, events, wrapper) => {
 const serverInit = async (context) => {
     logger.info(`Starting API At Port ${context.internal.definition.port}`);
 
-    await has(context, 'events.onServerStart') ? context.events.onServerStart(context) : Promise.resolve();//Execute Event If Any
+    await get(context, 'events.onServerStart', Promise.resolve)(context);//Execute Event If Any
 
     await loadSwaggerYaml(context);//Load swagger definition
     createServer(context); // Create restify server
     await swaggerize(context); //Load option for swagger configuration
     await listen(context); //Start Server
 
-    await has(context, 'events.afterStart') ? context.events.onServerStart(context) : Promise.resolve();//Execute Event If Any
+    await get(context, 'events.afterStart', Promise.resolve)(context);//Execute Event If Any
 
     return get(context, ['restify', 'server']);
 };
@@ -145,7 +143,7 @@ const listen = async (context) => {
 };
 
 //Register and event handler when there is an unhandled exception on the application
-const registerErrorHandler = (callback = noop) => {
+const registerErrorHandler = (callback) => {
     function unhandledError(err) {
         logger.error({err: err}, 'An unhandled error has occurred'); //Log Error
         return Promise.resolve(
@@ -153,7 +151,7 @@ const registerErrorHandler = (callback = noop) => {
                 try {
                     await callback(err); //Attempt to use call back to handle error
                 } catch (err) {//If there is an exception
-                    err => logger.error({err}, 'Exception handler failed');
+                    logger.error({err}, 'Exception handler failed');
                 } finally {
                     process.exit(exitCode.uncaughtError); //Terminate a
                 }
@@ -167,22 +165,30 @@ const registerErrorHandler = (callback = noop) => {
 };
 
 
-const onSignal = (context, timeout) => () => {
+const onSignal = (context, timeout) => async () => {
     logger.info('Starting API Termination');
-    Promise.race([
-        Promise.delay(timeout).then(() => logger.warn('API termination is waiting too long to finish')),
-        (async () => {
-            try {
-                await has(context, 'events.onTerminate') ? context.events.onTerminate(context) : Promise.resolve();
-                logger.info('API terminated successfully');
-            } catch (err) {
-                logger.error({err}, 'An error occurred in terminate handler');
-            }
-        })()
-    ]).then(
-        () => process.exit(exitCode.success)
-    );
 
+    const timeoutEvent = async () => {
+        await Promise.delay(timeout);
+        logger.warn('API termination is waiting too long to finish')
+    }
+
+    const onTerminate = async () => {
+        try {
+            await get(context, 'events.onTerminate', Promise.resolve)(context)
+            logger.info('API terminated successfully');
+        } catch (err) {
+            logger.error({err}, 'An error occurred in terminate handler')
+        }
+    }
+
+    const events = [
+        onTerminate(),
+        timeoutEvent()
+    ]
+
+    await Promise.race(events);
+    process.exit(exitCode.success)
 };
 
 
