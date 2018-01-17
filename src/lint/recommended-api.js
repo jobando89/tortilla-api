@@ -1,6 +1,7 @@
 module.exports = {
     extends: './recommended.js',
     globals: {
-        swaggerDefinition: true
+        swaggerDefinition: true,
+        tortillaApi: true,
     }
 };

@@ -1,4 +1,5 @@
-const {get, keys, noop} = require('lodash');
+const {get, keys, noop, isNil} = require('lodash');
+const Promise = require('bluebird');
 const guid = require('guid');
 const config = require('config');
 const Logger = require('logplease');
@@ -21,7 +22,12 @@ class Wrapper {
             });
 
             try {
-                return await operation(wrapper);
+                return await (!isNil(operation) ? operation :
+                    () => {
+                        wrapper.reply.ok();
+                        return Promise.resolve;
+                    }
+                )(wrapper);
             }
             catch (err) {
                 try {
@@ -30,7 +36,7 @@ class Wrapper {
                     logger.error(message, err);
                     const defaultHandler = wrapper.reply;
                     const errorHandler = get(res, 'errorHandler', defaultHandler);
-                    return errorHandler(statusCode, message,wrapper.reply);
+                    return errorHandler(statusCode, message, wrapper.reply);
                 }
                 catch (sendError) {
                     logger.error('Failed to send API response', sendError);

@@ -119,13 +119,6 @@ describe('src/server', function () {
             throw new Error('Test did not passed');
         });
 
-        it('should call onServerStart event', async function () {
-
-            await run();
-
-            eventsDefault.onServerStart.should.have.been.calledWith();
-        });
-
         it('should not call onServerStart event', async function () {
 
             await run(definitionDefault, {
@@ -136,14 +129,14 @@ describe('src/server', function () {
             eventsDefault.onServerStart.should.not.have.been.calledWith();
         });
 
-        it('should call onServerStart event', async function () {
+        it('should call afterStart event', async function () {
 
             await run();
 
             eventsDefault.afterStart.should.have.been.calledWith();
         });
 
-        it('should not call onServerStart event', async function () {
+        it('should not call afterStart event', async function () {
 
             await run(definitionDefault, {
                 ...eventsDefault,

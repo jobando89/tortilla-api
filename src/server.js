@@ -1,4 +1,4 @@
-const {noop, get, set, isNil, castArray, has} = require('lodash');
+const {noop, get, set, isNil, castArray} = require('lodash');
 const Promise = require('bluebird');
 const swaggerRestify = require('swagger-restify-mw');
 const restify = require('restify');
@@ -108,7 +108,6 @@ const mapWrapperProperties = context => (req, res, next) => {
 
 //Create swagger configuration
 const swaggerize = async (context) => {
-    const appRoot = context.internal.definition.appRoot;
     logger.debug('Loading swagger definition');
     const create = Promise.promisify(swaggerRestify.create);
 
@@ -170,25 +169,25 @@ const onSignal = (context, timeout) => async () => {
 
     const timeoutEvent = async () => {
         await Promise.delay(timeout);
-        logger.warn('API termination is waiting too long to finish')
-    }
+        logger.warn('API termination is waiting too long to finish');
+    };
 
     const onTerminate = async () => {
         try {
-            await get(context, 'events.onTerminate', Promise.resolve)(context)
+            await get(context, 'events.onTerminate', Promise.resolve)(context);
             logger.info('API terminated successfully');
         } catch (err) {
-            logger.error({err}, 'An error occurred in terminate handler')
+            logger.error({err}, 'An error occurred in terminate handler');
         }
-    }
+    };
 
     const events = [
         onTerminate(),
         timeoutEvent()
-    ]
+    ];
 
     await Promise.race(events);
-    process.exit(exitCode.success)
+    process.exit(exitCode.success);
 };
 
 
