@@ -7,6 +7,7 @@
     "start": "node example/start.js",
     "lint": "eslint src index.js example || true",
     "cover": "NODE_ENV=test istanbul cover _mocha",
+    "coveralls": "NODE_ENV=test istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
     "test": "NODE_ENV=test mocha --reporter dot"
   },
   "repository": {
@@ -22,9 +23,11 @@
   "devDependencies": {
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
+    "coveralls": "^3.0.0",
     "eslint": "^4.12.0",
     "istanbul": "^1.1.0-alpha.1",
     "mocha": "^4.0.1",
+    "mocha-lcov-reporter": "^1.3.0",
     "proxyquire": "^1.8.0",
     "sinon": "^4.1.2",
     "sinon-chai": "^2.10.0",

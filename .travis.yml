@@ -3,3 +3,5 @@ node_js:
  - "node"
 env:
  - NODE_ENV=test
+after_success:
+  - npm run coveralls

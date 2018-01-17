@@ -1,8 +1,6 @@
 # Tortilla-APi
 
-[![Build Status](https://travis-ci.org/jobando89/tortilla-api.svg?branch=master)](https://travis-ci.org/jobando89/tortilla-api)
-
-[![Coverage Status](https://coveralls.io/repos/github/jobando89/tortilla-api/badge.svg?branch=master)](https://coveralls.io/github/jobando89/tortilla-api?branch=master)
+[![Build Status](https://travis-ci.org/jobando89/tortilla-api.svg?branch=master)](https://travis-ci.org/jobando89/tortilla-api) [![Coverage Status](https://coveralls.io/repos/github/jobando89/tortilla-api/badge.svg?branch=master)](https://coveralls.io/github/jobando89/tortilla-api?branch=master)
 
 Tortilla-API is wrapper of restify and swaggerRestify for a quick and easy creation of REST API in node.
 
@@ -144,8 +142,6 @@ npm run cover
 ```
 
 ### coding style tests
-
-Explain what these tests test and why
 
 ```
 npm run lint
