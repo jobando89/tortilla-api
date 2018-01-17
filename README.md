@@ -1,5 +1,7 @@
 # Tortilla-APi
 
+[![Coverage Status](https://coveralls.io/repos/github/jobando89/tortilla-api/badge.svg?branch=master)](https://coveralls.io/github/jobando89/tortilla-api?branch=master)
+
 Tortilla-API is wrapper of restify and swaggerRestify for a quick and easy creation of REST API in node.
 
 ## Getting Started
