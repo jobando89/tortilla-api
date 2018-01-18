@@ -1,6 +1,7 @@
-# Tortilla-APi
+# Tortilla-API
 
-[![Build Status](https://travis-ci.org/jobando89/tortilla-api.svg?branch=master)](https://travis-ci.org/jobando89/tortilla-api) [![Coverage Status](https://coveralls.io/repos/github/jobando89/tortilla-api/badge.svg?branch=master)](https://coveralls.io/github/jobando89/tortilla-api?branch=master)
+[![Code Climate](https://img.shields.io/codeclimate/issues/github/jobando89/tortilla-api.svg)](https://codeclimate.com/github/jobando89/tortilla-api) [![npm](https://img.shields.io/npm/l/tortilla-api.svg)]() [![npm](https://img.shields.io/npm/v/tortilla-api.svg)](https://www.npmjs.com/package/tortilla-api) [![Maintainability](https://api.codeclimate.com/v1/badges/de28c3cba351adc4b19f/maintainability)](https://codeclimate.com/github/jobando89/tortilla-api/maintainability) [![Build Status](https://travis-ci.org/jobando89/tortilla-api.svg?branch=master)](https://travis-ci.org/jobando89/tortilla-api) [![Coverage Status](https://coveralls.io/repos/github/jobando89/tortilla-api/badge.svg?branch=master)](https://coveralls.io/github/jobando89/tortilla-api?branch=master)
+
 
 Tortilla-API is wrapper of restify and swaggerRestify for a quick and easy creation of REST API in node.
 
@@ -10,35 +11,19 @@ Install dependencies:
 ```
 npm install tortilla-api
 ```
-Use it as a module:
-
-```javascript
-const tortilla = require('tortilla-api');
-
-tortilla.create(
-    {
-        appRoot: __dirname //Look for required files in this directory
-    }
-);
-```
 
 ### Prerequisites
 
-Tortilla-API requires a specific folder structure relative to where appRoot is set to be.
+Tortilla-API the a file structure relative to where appRoot is setup.
 
-#####Folder Structure
+##### Folder Structure
 
-+ api
-	+ controllers
-		+ (all controller files)
-	+ swagger
-		+ swagger.yaml
-+ config (root directory of application)
-	+ default.yaml
+<img src="readme_media/tortilla-folder.jpg" />
 
 ### Configuration
 
-#####Configuration Documentation
+##### Configuration Documentation
+
 ```javascript
 tortilla.create(
 	{ // App definition
@@ -68,8 +53,7 @@ tortilla.create(
     }
 );
 ```
-### Example
-#####Configuration Example
+##### Configuration Example
 
 ```javascript
 const tortilla = require('tortilla-api');
@@ -114,8 +98,21 @@ tortilla.create(
     }
 );
 ```
+##### Controller Documentation
 
-Controller Method Example
+The controller uses the api method implementation of restify
+**For more information on restify properties see [http://restify.com/docs/server-api/](http://restify.com/docs/server-api/).**
+```javascript
+    ControllerExample : Wrapper.wrap(async helper => {//Initialize controller method
+        //Helper has 3 native properties
+        helper.res // response property
+        helper.req//  request property
+        helper.reply // setup replay for request needed to end http request 
+        return helper.res.reply.ok('Hello World');
+    })
+```
+
+##### Controller Method Example
 
 ```javascript
 const tortilla = require('tortilla-api');
@@ -123,36 +120,46 @@ const Wrapper = tortilla.wrapper;
 
 module.exports={
     ControllerExample : Wrapper.wrap(async helper => {
-        return helper.res.send(200, 'Hello World');
+        return helper.reply.ok('Hello World');
     })
 };
 ```
 
 
 ## Tests
-###Unit Tests
+
+##### Unit Tests
 
 ```
 npm run test
 ```
-###Code Coverage
+
+![tortilla-api](readme_media/tortilla-test.gif "tortilla-test" )
+
+##### Code Coverage
 
 ```
 npm run cover
 ```
 
-### coding style tests
+![tortilla-api](readme_media/tortilla-cover.gif "tortilla-cover" )
+
+
+##### Coding Style Tests
 
 ```
 npm run lint
 ```
+
+![tortilla-api](readme_media/tortilla-lint.gif "tortilla-lint" )
+
 
 ## Demo
 
 Clone the repo
 
 ```
-git clone https://github.com/jobando89/tortilla-api
+git clone https://github.com/jobando89/tortilla-api.git
 ```
 
 Inside the repo folder
@@ -162,5 +169,8 @@ npm install
 
 npm start
 ```
+![tortilla-api](readme_media/tortilla-start.gif "tortilla-start" )
 
 Navigate to http://localhost:8080
+
+![tortilla-api](readme_media/tortilla-get.gif "tortilla-get" )
