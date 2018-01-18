@@ -5,30 +5,53 @@
 
 Tortilla-API is wrapper of restify and swaggerRestify for a quick and easy creation of REST API in node.
 
-## Getting Started
+### Getting Started
 
 Install dependencies:
 ```
-npm install tortilla-api
+$ npm install tortilla-api
 ```
 
-### Prerequisites
+### Demo
+
+Clone the repo
+
+```
+$ git clone https://github.com/jobando89/tortilla-api.git
+```
+
+Inside the repo folder
+
+```
+$ npm install
+
+$ npm start
+```
+<img src="readme_media/tortilla-start.gif" width="500">
+
+Generate a get request to ***http://localhost:8080***
+
+<img src="readme_media/tortilla-get.gif" width="600">
+
+#### Prerequisites
 
 Tortilla-API the a file structure relative to where appRoot is setup.
 
 ##### Folder Structure
 
-<img src="readme_media/tortilla-folder.jpg" />
+The ***api*** folder should contain a ***controllers*** and a ***swagger*** folder. The ***controllers*** folder contains the files for the swagger defined in ***x-swagger-router-controller*** for each swagger path. The ***swagger*** folder contains the ***swagger.yaml*** definition. The location of the application folders is defined in the appRoot prorperty inside the ***tortilla.create()*** method.
 
-### Configuration
+<img src="readme_media/tortilla-folder.jpg"  width="400" />
+
+#### Configuration
 
 ##### Configuration Documentation
 
 ```javascript
 tortilla.create(
 	{ // App definition
-        appRoot, //Start point of where to look for dependencies
-		port, //The port to use to listen for requests
+        appRoot, //Start point of where to look for application folders
+		port, //The port to use to listen for requests. The default port is 8080
 
     },
     { //Events and restify middleware
@@ -100,7 +123,8 @@ tortilla.create(
 ```
 ##### Controller Documentation
 
-The controller uses the api method implementation of restify
+The controller uses the api method implementation of restify.
+
 **For more information on restify properties see [http://restify.com/docs/server-api/](http://restify.com/docs/server-api/).**
 ```javascript
     ControllerExample : Wrapper.wrap(async helper => {//Initialize controller method
@@ -126,51 +150,32 @@ module.exports={
 ```
 
 
-## Tests
+### Tests
 
 ##### Unit Tests
 
 ```
-npm run test
+$ npm run test
 ```
-
-![tortilla-api](readme_media/tortilla-test.gif "tortilla-test" )
+<img src="readme_media/tortilla-test.gif" width="550">
 
 ##### Code Coverage
 
 ```
-npm run cover
+$ npm run cover
 ```
 
-![tortilla-api](readme_media/tortilla-cover.gif "tortilla-cover" )
-
+<img src="readme_media/tortilla-cover.gif" width="550">
 
 ##### Coding Style Tests
 
 ```
-npm run lint
+$ npm run lint
 ```
 
-![tortilla-api](readme_media/tortilla-lint.gif "tortilla-lint" )
+<img src="readme_media/tortilla-lint.gif" width="450">
 
 
-## Demo
 
-Clone the repo
-
-```
-git clone https://github.com/jobando89/tortilla-api.git
-```
-
-Inside the repo folder
-
-```
-npm install
-
-npm start
-```
-![tortilla-api](readme_media/tortilla-start.gif "tortilla-start" )
-
-Navigate to http://localhost:8080
-
-![tortilla-api](readme_media/tortilla-get.gif "tortilla-get" )
+### License
+[MIT License](LICENSE.md)
