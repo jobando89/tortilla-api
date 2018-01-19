@@ -93,15 +93,15 @@ const createServer = (context) => {
         logger.error({route, err}, 'An unhandled exception has occurred');
         res.send(500, 'An internal error has occurred.');
     });
+    server.use(bodyParser.json(context));
+    server.use(busboyBodyParcer());
     get(context, 'events.middleware', []).map(middleware => server.use(middleware)); //Register server middleware
     server.use(setLogger(context));
     server.use(mapWrapperProperties(context)); //Register middleware for wrapper use
-    server.use(bodyParser.json(context));
-    server.use(busboyBodyParcer());
     set(context, 'restify.server', server); ////Load server to current context
 };
 
-const setLogger = context =>  (req, res, next) => {
+const setLogger = context => (req, res, next) => {
     req.logger = get(context, 'internal.definition.logger', noop)();
     next();
 }
