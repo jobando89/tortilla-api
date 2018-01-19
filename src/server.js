@@ -36,6 +36,7 @@ const create = async (definition, events, wrapper) => {
                 appRoot: __dirname, //This directory
                 port: get(config, 'port', 8080), //Default port
                 error: noop, //Return undefined
+                logger: get(definition, 'logger'),
                 ...definition //Overwrite the properties
             },
         },
@@ -92,13 +93,18 @@ const createServer = (context) => {
         logger.error({route, err}, 'An unhandled exception has occurred');
         res.send(500, 'An internal error has occurred.');
     });
-
     get(context, 'events.middleware', []).map(middleware => server.use(middleware)); //Register server middleware
+    server.use(setLogger(context));
     server.use(mapWrapperProperties(context)); //Register middleware for wrapper use
     server.use(bodyParser.json(context));
     server.use(busboyBodyParcer());
     set(context, 'restify.server', server); ////Load server to current context
 };
+
+const setLogger = context =>  (req, res, next) => {
+    req.logger = get(context, 'internal.definition.logger', noop)();
+    next();
+}
 
 const mapWrapperProperties = context => (req, res, next) => {
     req.wrapperProperties = get(context, 'wrapper.props', noop);
