@@ -43,7 +43,7 @@
     "express": "^4.16.2",
     "guid": "0.0.12",
     "lodash": "^4.17.4",
-    "logplease": "^1.2.14",
+    "logplease": "github:jobando89/logplease#jaodev",
     "path": "^0.12.7",
     "restify": "^6.3.4",
     "stoppable": "^1.0.4",

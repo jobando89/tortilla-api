@@ -53,10 +53,6 @@ describe('src/server', function () {
             sandbox.stub(process, 'exit').returns();
             sandbox.stub(process, 'on');
             sandbox.stub(restify, 'createServer').returns(server);
-            sandbox.stub(Logger, 'create').returns({
-                    ...loggingLevel
-                }
-            );
 
             definitionDefault = {
                 appRoot: 'fake-appRoot',
@@ -80,9 +76,9 @@ describe('src/server', function () {
         });
 
 
-        function run(definition = definitionDefault, events = eventsDefault, wrapper = wrapperDefault) {
+        function run(definition = definitionDefault, events = eventsDefault, wrapper = wrapperDefault, logger = loggingLevel) {
             const src = proxyquire(`${__BASE}/src/server`, {});
-            return src.create(definition, events, wrapper);
+            return src.create(definition, events, wrapper, logger);
         }
 
 
@@ -255,7 +251,7 @@ describe('src/server', function () {
             const next = sandbox.stub();
             await run();
 
-            serverUseStack[1]({}, {}, next);
+            serverUseStack[4]({}, {}, next);//Position in the stack where
 
             next.should.have.been.calledWith();
 

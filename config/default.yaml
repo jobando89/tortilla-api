@@ -1,4 +1,13 @@
 port:
   8080
-loglevel:
-  'INFO'
+log:
+  server:
+    level:
+      'INFO'
+    color:
+      'Yellow'
+  http:
+    level:
+      'DEBUG'
+    color:
+      'Yellow'

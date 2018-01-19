@@ -1,8 +1,5 @@
 const {get, keys, noop, isNil} = require('lodash');
 const Promise = require('bluebird');
-const config = require('config');
-const Logger = require('logplease');
-Logger.setLogLevel(get(config, 'loglevel', 'INFO'));
 
 class Wrapper {
     constructor(req, res, logger) {
@@ -13,7 +10,7 @@ class Wrapper {
 
     static wrap(operation) {
         return async (req, res) => {
-            const logger = get(req,'logger');
+            const logger = get(req, 'logger');
             const wrapper = new Wrapper(req, res, logger);
             wrapper.logger.info('Start Request');
             const wrapperFunction = get(req, 'wrapperProperties', noop);
@@ -23,12 +20,13 @@ class Wrapper {
             });
 
             try {
-                return await (!isNil(operation) ? operation :
+                await (!isNil(operation) ? operation :
                         () => {
                             wrapper.reply.ok();
                             return Promise.resolve;
                         }
                 )(wrapper);
+                return wrapper.logger.info('End Request');
             }
             catch (err) {
                 try {
@@ -74,8 +72,14 @@ class Wrapper {
     }
 
     get logger() {
-        const guid = require('guid');
-        const defaultLogger = get(this, '_logger', Logger.create(`Request:${guid.raw()}`, {color: Logger.Colors['Yellow']}));
+        const defaultLogger =
+            {
+                debug: get(this, '_logger.debug', noop),
+                log: get(this, '_logger.log', noop),
+                info: get(this, '_logger.info', noop),
+                warn: get(this, '_logger.warn', noop),
+                error: get(this, '_logger.error', noop)
+            };
         return defaultLogger;
     }
 }
