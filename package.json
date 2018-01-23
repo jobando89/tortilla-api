@@ -1,7 +1,7 @@
 {
   "name": "tortilla-api",
-  "version": "0.1.0",
-  "description": "",
+  "version": "0.1.1",
+  "description": "Wrapper of restify and swaggerRestify for a quick and easy creation of REST API in node",
   "main": "index.js",
   "scripts": {
     "start": "node example/start.js",
