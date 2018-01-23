@@ -32,7 +32,6 @@ const create = async ({definition, events, wrapper, serverLogger}) => {
             definition: {
                 appRoot: __dirname, //This directory
                 port: get(config, 'port', 8080), //Default port
-                error: noop, //Return undefined
                 logger: get(definition, 'logger'), //Controller logger
                 ...definition //Overwrite the properties
             },
@@ -106,7 +105,7 @@ const createServer = (context) => {
 };
 
 const setLogger = context => (req, res, next) => {
-    req.logger = get(context, 'internal.definition.logger', noop)();
+    req.logger = get(context, 'internal.definition.logger', noop());
     next();
 };
 

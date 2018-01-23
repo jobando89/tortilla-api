@@ -57,6 +57,7 @@ describe('src/server', function () {
             definitionDefault = {
                 appRoot: 'fake-appRoot',
                 port: 'fake-port',
+                logger: 'fake-logger'
             };
 
             eventsDefault = {
@@ -76,9 +77,16 @@ describe('src/server', function () {
         });
 
 
-        function run(definition = definitionDefault, events = eventsDefault, wrapper = wrapperDefault, logger = loggingLevel) {
+        function run(definition = definitionDefault, events = eventsDefault, wrapper = wrapperDefault, serverLogger = loggingLevel) {
             const src = proxyquire(`${__BASE}/src/server`, {});
-            return src.create(definition, events, wrapper, logger);
+            return src.create(
+                {
+                    definition,
+                    events,
+                    wrapper,
+                    serverLogger
+                }
+            );
         }
 
 
@@ -257,6 +265,17 @@ describe('src/server', function () {
 
         })
 
+        it('should call setLogger', async function () {
+            const next = sandbox.stub();
+            const req = {};
+            await run();
+
+            serverUseStack[2](req, {}, next);//Position in the stack where
+            req.logger.should.equal('fake-logger');
+            next.should.have.been.calledWith();
+
+        })
+
         it('should use NODE_ENV local_dev', async function () {
             process.env.NODE_ENV = 'local_dev'
 
@@ -273,11 +292,13 @@ describe('src/server', function () {
                 definitionDefault,
                 {
                     ...eventsDefault,
-                    onServerStart:()=>{throw err}
+                    onServerStart: () => {
+                        throw err
+                    }
                 },
                 wrapperDefault
             );
-            loggingLevel.error.should.have.been.calledWith({err},'Service failed to start')
+            loggingLevel.error.should.have.been.calledWith({err}, 'Service failed to start')
             process.exit.should.have.been.calledWith(999);
 
         })
