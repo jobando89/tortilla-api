@@ -14,17 +14,19 @@ const logger = () => {
 }
 
 
-server.create({
-        appRoot: `${__dirname}`,
-        logger: () => {
-            const Logger = require('logplease');
-            const color = get(config, 'log.http.color', 'Yellow');
-            Logger.setLogLevel(get(config, 'log.http.level', 'INFO'));
-            const defaultLogger = Logger.create(`Request:${guid.raw()}`, {color: Logger.Colors[color]});
-            return defaultLogger;
+server.create(
+    {
+        definition: {
+            appRoot: `${__dirname}`,
+            logger:
+                () => {
+                    const Logger = require('logplease');
+                    const color = get(config, 'log.http.color', 'Yellow');
+                    Logger.setLogLevel(get(config, 'log.http.level', 'INFO'));
+                    const defaultLogger = Logger.create(`Request:${guid.raw()}`, {color: Logger.Colors[color]});
+                    return defaultLogger;
+                },
         },
-    },
-    {},
-    {},
-    logger()
+        serverLogger: logger()
+    }
 );

@@ -23,7 +23,7 @@ const signals = [
 
 let logger;
 
-const create = async (definition, events, wrapper, serverLogger) => {
+const create = async ({definition, events, wrapper, serverLogger}) => {
 
     const context = {
         env: process.env, //Register run environment
