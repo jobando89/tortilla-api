@@ -74,11 +74,11 @@ class Wrapper {
     get logger() {
         const defaultLogger =
             {
-                debug: get(this, '_logger.debug', noop),
-                log: get(this, '_logger.log', noop),
-                info: get(this, '_logger.info', noop),
-                warn: get(this, '_logger.warn', noop),
-                error: get(this, '_logger.error', noop)
+                debug: (get(this, '_logger.debug', noop)).bind(this._logger),
+                log: (get(this, '_logger.log', noop)).bind(this._logger),
+                info: (get(this, '_logger.info', noop)).bind(this._logger),
+                warn: (get(this, '_logger.warn', noop)).bind(this._logger),
+                error: (get(this, '_logger.error', noop)).bind(this._logger)
             };
         return defaultLogger;
     }
