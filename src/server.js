@@ -46,7 +46,7 @@ const create = async ({definition, events, wrapper, serverLogger}) => {
         info: get(serverLogger, 'info', noop).bind(serverLogger),
         warn: get(serverLogger, 'warn', noop).bind(serverLogger),
         error: get(serverLogger, 'error', noop).bind(serverLogger)
-    }
+    };
 
     if (isNil(get(context, 'internal.definition.appRoot'))) throw new Error('The application appRoot cannot be undefined');
 

@@ -21,10 +21,10 @@ class Wrapper {
 
             try {
                 await (!isNil(operation) ? operation :
-                        () => {
-                            wrapper.reply.ok();
-                            return Promise.resolve;
-                        }
+                    () => {
+                        wrapper.reply.ok();
+                        return Promise.resolve;
+                    }
                 )(wrapper);
                 return wrapper.logger.info('End Request');
             }
