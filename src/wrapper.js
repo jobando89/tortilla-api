@@ -1,20 +1,18 @@
 const {get, keys, noop, isNil} = require('lodash');
 const Promise = require('bluebird');
-const guid = require('guid');
-const config = require('config');
-const Logger = require('logplease');
-const logger = Logger.create(`Request:${guid.raw()}`, {color: Logger.Colors.Yellow});
-Logger.setLogLevel(get(config, 'loglevel', 'INFO'));
 
 class Wrapper {
-    constructor(req, res) {
+    constructor(req, res, logger) {
         this._req = req;
         this._res = res;
+        this._logger = logger;
     }
 
     static wrap(operation) {
         return async (req, res) => {
-            const wrapper = new Wrapper(req, res);
+            const logger = get(req, 'logger');
+            const wrapper = new Wrapper(req, res, logger);
+            wrapper.logger.info('Start Request');
             const wrapperFunction = get(req, 'wrapperProperties', noop);
             const wrapperProperties = wrapperFunction(wrapper.req, wrapper.res);
             keys(wrapperProperties).forEach(key => {
@@ -22,12 +20,13 @@ class Wrapper {
             });
 
             try {
-                return await (!isNil(operation) ? operation :
+                await (!isNil(operation) ? operation :
                     () => {
                         wrapper.reply.ok();
                         return Promise.resolve;
                     }
                 )(wrapper);
+                return wrapper.logger.info('End Request');
             }
             catch (err) {
                 try {
@@ -73,7 +72,15 @@ class Wrapper {
     }
 
     get logger() {
-        return logger;
+        const defaultLogger =
+            {
+                debug: (get(this, '_logger.debug', noop)).bind(this._logger),
+                log: (get(this, '_logger.log', noop)).bind(this._logger),
+                info: (get(this, '_logger.info', noop)).bind(this._logger),
+                warn: (get(this, '_logger.warn', noop)).bind(this._logger),
+                error: (get(this, '_logger.error', noop)).bind(this._logger)
+            };
+        return defaultLogger;
     }
 }
 

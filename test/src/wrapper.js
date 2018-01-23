@@ -1,6 +1,5 @@
 const sinon = require('sinon');
 const proxyquire = require('proxyquire');
-const Logger = require('logplease');
 const {has, set} = require('lodash');
 
 
@@ -10,7 +9,7 @@ describe('src/wrapper', function () {
 
     describe('wrap', function () {
 
-        let loggingLevel;
+        let logger;
 
         function run(operation) {
             const src = proxyquire(`${__BASE}/src/wrapper`, {});
@@ -22,25 +21,21 @@ describe('src/wrapper', function () {
         });
 
         beforeEach(function () {
-            loggingLevel = {
+            logger = {
                 info: sandbox.stub().returns(),
                 error: sandbox.stub().returns(),
                 debug: sandbox.stub().returns(),
                 warn: sandbox.stub().returns()
             };
-            sandbox.stub(Logger, 'create').returns({
-                    ...loggingLevel
-                }
-            );
         });
 
         it('should return an ok status', async function () {
-
             const res = {
                 send: sandbox.stub().returns()
             }
-
-            await run()({}, res);
+            await run()({
+                logger
+            }, res);
         });
 
         it('should map wrapperProperties functions', async function () {
@@ -217,20 +212,21 @@ describe('src/wrapper', function () {
                 fakewrapper = wrapper
             };
             const req = {
-                swagger:{
-                    params:{
-                        'fake-param':{
-                            value:'fake-value'
+                swagger: {
+                    params: {
+                        'fake-param': {
+                            value: 'fake-value'
                         }
                     }
                 },
+                logger,
             }
             await run(operation)(req, res);
 
-            const logger = fakewrapper.logger
+            const loggerWrapper = fakewrapper.logger
 
-            logger.info('fake-log');
-            loggingLevel.info.should.have.been.calledWith('fake-log')
+            loggerWrapper.info('fake-log');
+            logger.info.should.have.been.calledWith('fake-log')
         });
 
         it('should call get a request', async function () {
@@ -242,10 +238,10 @@ describe('src/wrapper', function () {
                 fakewrapper = wrapper
             };
             const req = {
-                swagger:{
-                    params:{
-                        'fake-param':{
-                            value:'fake-value'
+                swagger: {
+                    params: {
+                        'fake-param': {
+                            value: 'fake-value'
                         }
                     }
                 },
@@ -271,7 +267,7 @@ describe('src/wrapper', function () {
                 throw err;
             };
 
-            await run(operation)({}, res);
+            await run(operation)({logger}, res);
 
             fakewrapper._res.send.should.have.been.calledWith(500)
         });
@@ -292,9 +288,9 @@ describe('src/wrapper', function () {
                 throw err;
             };
 
-            await run(operation)({}, res);
+            await run(operation)({logger}, res);
 
-            loggingLevel.error.should.have.been.calledWith('Failed to send API response');
+            logger.error.should.have.been.calledWith('Failed to send API response');
         });
 
     });

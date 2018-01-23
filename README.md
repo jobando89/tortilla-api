@@ -49,30 +49,33 @@ The ***api*** folder should contain a ***controllers*** and a ***swagger*** fold
 
 ```javascript
 tortilla.create(
-	{ // App definition
-        appRoot, //Start point of where to look for application folders
-		port, //The port to use to listen for requests. The default port is 8080
-
-    },
-    { //Events and restify middleware
-        onServerStart, //Called before the server starts
-
-		afterStart, //Called after the server has started
-
-        onTerminate, //Called before the application is terminated
-
-		error, //Event handler when there is an unhandled exception in the application
-
-        middleware: [ //Referrer to Universal handlers for usage of middleware (http://restify.com/docs/home/)
-		//Array of functions
-		]
-    },
-    { //Properties and error handling for controller methods
-        props: (req, res) => { //Add to the wrapper when used in the controller methods
+	{
+        definition: { // App definition
+            appRoot, //Start point of where to look for application folders
+            port, //The port to use to listen for requests. The default port is 8080  
+            logger //Controller logger
         },
-        errorHandler:(statusCode, message,reply)=>{ //Unhandled exceptions from the controller methods can be taken care of here.
-		//By default all errors will return http 500 with the error message of the exception
-        }
+        events: { //Events and restify middleware
+            onServerStart, //Called before the server starts
+    
+            afterStart, //Called after the server has started
+    
+            onTerminate, //Called before the application is terminated
+    
+            error, //Event handler when there is an unhandled exception in the application
+    
+            middleware: [ //Referrer to Universal handlers for usage of middleware (http://restify.com/docs/home/)
+            //Array of functions
+            ]
+        },
+        wrapper: { //Properties and error handling for controller methods
+            props: (req, res) => { //Add to the wrapper when used in the controller methods
+            },
+            errorHandler:(statusCode, message,reply)=>{ //Unhandled exceptions from the controller methods can be taken care of here.
+            //By default all errors will return http 500 with the error message of the exception
+            }
+        },
+        serverLogger //Set logging method
     }
 );
 ```
@@ -82,41 +85,53 @@ tortilla.create(
 const tortilla = require('tortilla-api');
 
 tortilla.create(
-	{ // App definition
-        appRoot: __dirname,
-		port: 8080
-    },
-    { //Events and restify middleware
-        onServerStart: function(context) {
-			console.log('Called before the server starts')
-		},
-		afterStart: function(context) {
-			console.log('Called after the server has started')
-		},
-        onTerminate: function(context) {
-			console.log('Called before the application is terminated')
-		},
-		error: function(err) {
-			console.log('unhandled exception in the application')
-		},
-        middleware: [
-			function(req, res, next) {
-    			console.warn('run for all routes!');
-    			return next();
-			}
-		]
-    },
-    { //Properties and error handling for controller methods
-        props: function (req, res) {
-			const myQueryParam = req.getParam('myQueryParam');
-			return {
-				myQueryParam
-			};
+    {
+        definition: { // App definition
+            appRoot: __dirname,
+            port: 8080
         },
-        errorHandler:(statusCode, message,reply)=>{
-			if (message.includes('doesn\'t exist')) {
-                return reply.notFound(message);
+        events: { //Events and restify middleware
+            onServerStart: function(context) {
+                console.log('Called before the server starts')
+            },
+            afterStart: function(context) {
+                console.log('Called after the server has started')
+            },
+            onTerminate: function(context) {
+                console.log('Called before the application is terminated')
+            },
+            error: function(err) {
+                console.log('unhandled exception in the application')
+            },
+            middleware: [
+                function(req, res, next) {
+                    console.warn('run for all routes!');
+                    return next();
+                }
+            ]
+        },
+        wrapper: { //Properties and error handling for controller methods
+            props: function (req, res) {
+                const myQueryParam = req.getParam('myQueryParam');
+                return {
+                    myQueryParam
+                };
+            },
+            errorHandler:(statusCode, message,reply)=>{
+                if (message.includes('doesn\'t exist')) {
+                    return reply.notFound(message);
+                }
             }
+        },
+        serverLogger: { 
+            // Adding logging at the server level. Any logging logging library 
+            // should work what implements the below are the 
+            // possible logging levels
+            debug: console.log,
+            log: console.log,
+            info: console.log,
+            warn: console.log,
+            error: console.log
         }
     }
 );
@@ -128,10 +143,11 @@ The controller uses the api method implementation of restify.
 **For more information on restify properties see [http://restify.com/docs/server-api/](http://restify.com/docs/server-api/).**
 ```javascript
     ControllerExample : Wrapper.wrap(async helper => {//Initialize controller method
-        //Helper has 3 native properties
+        //Helper native properties
         helper.res // response property
         helper.req//  request property
         helper.reply // setup replay for request needed to end http request 
+        helper.logger // Log at different levels: debug, log, info, warn and error
         return helper.res.reply.ok('Hello World');
     })
 ```
@@ -144,6 +160,7 @@ const Wrapper = tortilla.wrapper;
 
 module.exports={
     ControllerExample : Wrapper.wrap(async helper => {
+        helper.logger.info('Hello World');
         return helper.reply.ok('Hello World');
     })
 };

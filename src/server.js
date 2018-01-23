@@ -7,10 +7,6 @@ const swaggerParser = require('swagger-parser');
 const config = require('config');
 const bodyParser = require('body-parser');
 const busboyBodyParcer = require('busboy-body-parser');
-const Logger = require('logplease');
-const logger = Logger.create('Main Application', {color: Logger.Colors.Yellow});
-
-Logger.setLogLevel(get(config, 'loglevel', 'INFO'));
 
 const exitCode = {
     success: 0,
@@ -25,8 +21,9 @@ const signals = [
     'SIGHUP'
 ];
 
+let logger;
 
-const create = async (definition, events, wrapper) => {
+const create = async ({definition, events, wrapper, serverLogger}) => {
 
     const context = {
         env: process.env, //Register run environment
@@ -35,14 +32,21 @@ const create = async (definition, events, wrapper) => {
             definition: {
                 appRoot: __dirname, //This directory
                 port: get(config, 'port', 8080), //Default port
-                error: noop, //Return undefined
+                logger: get(definition, 'logger'), //Controller logger
                 ...definition //Overwrite the properties
             },
         },
         events,//{onServerStart,afterStart}
-        wrapper
+        wrapper,
     };
 
+    logger = {
+        debug: (get(serverLogger, 'debug', noop)).bind(serverLogger),
+        log: get(serverLogger, 'log', noop).bind(serverLogger),
+        info: get(serverLogger, 'info', noop).bind(serverLogger),
+        warn: get(serverLogger, 'warn', noop).bind(serverLogger),
+        error: get(serverLogger, 'error', noop).bind(serverLogger)
+    };
 
     if (isNil(get(context, 'internal.definition.appRoot'))) throw new Error('The application appRoot cannot be undefined');
 
@@ -92,12 +96,17 @@ const createServer = (context) => {
         logger.error({route, err}, 'An unhandled exception has occurred');
         res.send(500, 'An internal error has occurred.');
     });
-
-    get(context, 'events.middleware', []).map(middleware => server.use(middleware)); //Register server middleware
-    server.use(mapWrapperProperties(context)); //Register middleware for wrapper use
     server.use(bodyParser.json(context));
     server.use(busboyBodyParcer());
+    server.use(setLogger(context));
+    get(context, 'events.middleware', []).map(middleware => server.use(middleware)); //Register server middleware
+    server.use(mapWrapperProperties(context)); //Register middleware for wrapper use
     set(context, 'restify.server', server); ////Load server to current context
+};
+
+const setLogger = context => (req, res, next) => {
+    req.logger = get(context, 'internal.definition.logger', noop());
+    next();
 };
 
 const mapWrapperProperties = context => (req, res, next) => {
