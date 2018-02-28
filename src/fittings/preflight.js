@@ -11,7 +11,7 @@ const defaults = Object.freeze({
 });
 
 const create = (fittingDef) => {
-
+//TODO: Enable cors always?
     const methods = castArray(get(fittingDef, ['methods'], defaults.methods));
     const origins = castArray(get(fittingDef, ['origins'], defaults.origins));
     const status = get(fittingDef, ['status'], defaults.status);

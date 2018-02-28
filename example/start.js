@@ -22,7 +22,7 @@ server.create(
                     const color = get(config, 'log.http.color', 'Yellow');
                     const defaultLogger = Logger.create(`Request:${guid.raw()}`, {color: Logger.Colors[color]});
                     return defaultLogger;
-                })(),
+                }),
         },
         serverLogger: logger
     }
