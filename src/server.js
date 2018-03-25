@@ -23,7 +23,7 @@ const signals = [
 
 let logger;
 
-const create = async ({definition, events, wrapper, serverLogger}) => {
+const create = async ({definition, events, wrapper, serverLogger, bodyParser}) => {
 
     const context = {
         env: process.env, //Register run environment
@@ -38,6 +38,7 @@ const create = async ({definition, events, wrapper, serverLogger}) => {
         },
         events,//{onServerStart,afterStart}
         wrapper,
+        bodyParser,
     };
 
     logger = {
@@ -96,7 +97,7 @@ const createServer = (context) => {
         logger.error({route, err}, 'An unhandled exception has occurred');
         res.send(500, 'An internal error has occurred.');
     });
-    server.use(bodyParser.json(context));
+    server.use(bodyParser.json(get(context,'bodyParser',{})));
     server.use(busboyBodyParcer());
     server.use(setLogger(context));
     get(context, 'events.middleware', []).map(middleware => server.use(middleware)); //Register server middleware
