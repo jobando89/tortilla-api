@@ -23,7 +23,7 @@ const signals = [
 
 let logger;
 
-const create = async ({definition, events, wrapper, serverLogger, bodyParser}) => {
+const create = async ({definition, events, wrapper, serverLogger, bodyParser, securityHandlers}) => {
 
     const context = {
         env: process.env, //Register run environment
@@ -39,6 +39,7 @@ const create = async ({definition, events, wrapper, serverLogger, bodyParser}) =
         events,//{onServerStart,afterStart}
         wrapper,
         bodyParser,
+        securityHandlers,
     };
 
     logger = {
@@ -97,7 +98,7 @@ const createServer = (context) => {
         logger.error({route, err}, 'An unhandled exception has occurred');
         res.send(500, 'An internal error has occurred.');
     });
-    server.use(bodyParser.json(get(context,'bodyParser',{})));
+    server.use(bodyParser.json(get(context, 'bodyParser', {})));
     server.use(busboyBodyParcer());
     server.use(setLogger(context));
     get(context, 'events.middleware', []).map(middleware => server.use(middleware)); //Register server middleware
@@ -133,7 +134,8 @@ const swaggerize = async (context) => {
         ...swaggerConfig,
         ...get(context, 'config.swagger', {}),
         swagger: context.swagger.definition,
-        appRoot: context.internal.definition.appRoot
+        appRoot: context.internal.definition.appRoot,
+        securityHandlers: get(context, 'securityHandlers'),
     };
 
     const swagger = await create(options);
