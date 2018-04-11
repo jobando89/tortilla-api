@@ -111,7 +111,10 @@ const setLogger = context => (req, res, next) => {
     if(typeof loggingFunction !== 'function'){
         throw new Error('definition.logger is not a function');
     }
-    req.logger = Promise.resolve(loggingFunction(req, res)).then(()=>next()).catch(err=>next(err));
+    Promise.resolve(loggingFunction(req, res)).then((logger)=>{
+        req.logger = logger;
+        next();
+    }).catch(err=>next(err));
 };
 
 const mapWrapperProperties = context => (req, res, next) => {
