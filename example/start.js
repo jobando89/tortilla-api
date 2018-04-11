@@ -4,7 +4,6 @@ const config = require('config');
 const {get} = require('lodash');
 const guid = require('guid');
 const Logger = require('logplease');
-Logger.setLogLevel(get(config, 'log.server.level', 'INFO'));
 
 const logger = (() => {
     const color = get(config, 'log.server.color', 'Yellow');

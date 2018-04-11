@@ -107,7 +107,7 @@ const createServer = (context) => {
 };
 
 const setLogger = context => (req, res, next) => {
-    req.logger = get(context, 'internal.definition.logger', noop());
+    req.logger = get(context, 'internal.definition.logger', noop)();
     next();
 };
 
