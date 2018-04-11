@@ -107,8 +107,11 @@ const createServer = (context) => {
 };
 
 const setLogger = context => (req, res, next) => {
-    req.logger = get(context, 'internal.definition.logger', noop)();
-    next();
+    const loggingFunction =get(context, 'internal.definition.logger', noop);
+    if(typeof loggingFunction !== 'function'){
+        throw new Error('definition.logger is not a function');
+    }
+    req.logger = Promise.resolve(loggingFunction(req, res)).then(()=>next()).catch(err=>next(err));
 };
 
 const mapWrapperProperties = context => (req, res, next) => {
