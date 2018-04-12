@@ -1,4 +1,7 @@
-const {noop, get, set, isNil, castArray} = require('lodash');
+const {noop, set, get, isNil, castArray} = require('lodash');
+const getFp = require('lodash/fp/get');
+const forEach = require('lodash/fp/forEach');
+const compose = require('lodash/fp/compose');
 const Promise = require('bluebird');
 const swaggerRestify = require('swagger-restify-mw');
 const restify = require('restify');
@@ -100,21 +103,30 @@ const createServer = (context) => {
     });
     server.use(bodyParser.json(get(context, 'bodyParser', {})));
     server.use(busboyBodyParcer());
-    server.use(setLogger(context));
-    get(context, 'events.middleware', []).map(middleware => server.use(middleware)); //Register server middleware
-    server.use(mapWrapperProperties(context)); //Register middleware for wrapper use
     set(context, 'restify.server', server); ////Load server to current context
 };
 
+const getMiddleware = (context) => {
+    const array = [];
+    array.push(setLogger(context));
+    const mapFunction = middleware => array.push(middleware)
+    compose(
+        forEach(mapFunction),
+        getFp('events.middleware')
+    )(context);
+    array.push(mapWrapperProperties(context)); //Register middleware for wrapper use
+    return array;
+}
+
 const setLogger = context => (req, res, next) => {
-    const loggingFunction =get(context, 'internal.definition.logger', noop);
-    if(typeof loggingFunction !== 'function'){
+    const loggingFunction = get(context, 'internal.definition.logger', noop);
+    if (typeof loggingFunction !== 'function') {
         throw new Error('definition.logger is not a function');
     }
-    Promise.resolve(loggingFunction(req, res)).then((logger)=>{
+    Promise.resolve(loggingFunction(req, res)).then((logger) => {
         req.logger = logger;
         next();
-    }).catch(err=>next(err));
+    }).catch(err => next(err));
 };
 
 const mapWrapperProperties = context => (req, res, next) => {
@@ -135,6 +147,7 @@ const swaggerize = async (context) => {
     const cors = get(context, 'env.NODE_ENV', '').toLowerCase() === 'local_dev' ? true : false;//get value for cors
 
     set(swaggerConfig, 'bagpipes._preflight.cors', cors); //Set value for cors
+    set(swaggerConfig, 'bagpipes._middleware.middleware', getMiddleware(context)); //Set value for cors
 
     const options = {
         ...swaggerConfig,

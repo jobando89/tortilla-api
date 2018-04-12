@@ -23,12 +23,17 @@
       "name": "preflight",
       "cors": false
     },
+    "_middleware": {
+      "name": "middleware",
+      "middleware": []
+    },
     "swagger_controllers": [
       {
         "onError": "json_error_handler"
       },
       "_preflight",
       "swagger_security",
+      "_middleware",
       "swagger_params_parser",
       "_swagger_validate",
       "express_compatibility",
