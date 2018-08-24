@@ -26,7 +26,7 @@ const signals = [
 
 let logger;
 
-const create = async ({definition, events, wrapper, serverLogger, bodyParser, securityHandlers}) => {
+const create = async ({definition, events, wrapper, serverLogger, bodyParser, securityHandlers, cors}) => {
 
     const context = {
         env: process.env, //Register run environment
@@ -43,6 +43,7 @@ const create = async ({definition, events, wrapper, serverLogger, bodyParser, se
         wrapper,
         bodyParser,
         securityHandlers,
+        cors,
     };
 
     logger = {
@@ -147,6 +148,13 @@ const swaggerize = async (context) => {
     const cors = get(context, 'env.NODE_ENV', '').toLowerCase() === 'local_dev' ? true : false;//get value for cors
 
     set(swaggerConfig, 'bagpipes._preflight.cors', cors); //Set value for cors
+
+    swaggerConfig.bagpipes._preflight = {
+        ...swaggerConfig.bagpipes._preflight,
+        ...context.cors,
+        name: 'preflight',
+    }
+
     set(swaggerConfig, 'bagpipes._middleware.middleware', getMiddleware(context)); //Set value for cors
 
     const options = {

@@ -17,9 +17,15 @@ const create = (fittingDef) => {
     const status = get(fittingDef, ['status'], defaults.status);
     const cors = get(fittingDef, ['cors'], defaults.cors);
     const headers = get(fittingDef, ['headers']);
+    const override = get(fittingDef, 'override');
 
     return function (context, next) {
         const {request: req, response: res} = context;
+
+        if (override) {
+            return override(req, res, next);
+        }
+
 
         if (cors) {
             const origin = get(req, ['headers', 'http_origin'], '*');
